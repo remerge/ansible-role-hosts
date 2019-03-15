@@ -30,3 +30,5 @@ hosts_network_interface: ''
 
 # Backup of previous host
 host_file_backup: no
+
+hosts_custom_hosts_marker: "Custom Hosts Managed Block"

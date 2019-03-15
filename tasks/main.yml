@@ -11,12 +11,20 @@
 ##     backup: "{{ host_file_backup }}"
 ##   tags: hosts
 
+## - name: render host_entries
+##   debug: msg="{{ hosts_entries }}"
+
+- name: render custom hosts template
+  set_fact: 
+    custom_hosts: "{{ lookup('template', 'custom_hosts.j2') }}"
+
+## - name: render debug
+##   debug: msg="{{ lookup('template', 'custom_hosts.j2') }}"
+
 - name: Add Managed Block to {{ hosts_file }}
   blockinfile:
     path: "{{ hosts_file }}"
     owner: root
     group: root
-    block: |
-      {{ item.ip }} {{ item.name.split(".")[0] }} {{ item.name }}
-    marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.name }}"
-  with_items: "{{ host_entries }}"
+    content: "{{ custom_hosts }}"
+    marker: "# {{ hosts_custom_hosts_marker }} {mark}"
