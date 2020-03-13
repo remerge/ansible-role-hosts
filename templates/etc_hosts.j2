@@ -34,10 +34,13 @@ ff02::2  ip6-allrouters
     {% set di = hostvars[host]['ansible_default_' + hosts_ip_protocol]['interface']|default(None) -%}
   {% endif -%}
   {% for interface in my_interfaces -%}
-    {% if interface == di -%}
-{{ hostvars[host]['ansible_' + interface][hosts_ip_protocol]['address'] }}    {{ host.name }} {{ host.name }}-{{ interface }} {{ host.aliases | default('') | join(' ') }}
-    {% else -%}
-{{ hostvars[host]['ansible_' + interface][hosts_ip_protocol]['address'] }}    {{ host.name }}-{{ interface }} {{ host.aliases | default('') | join(' ') }}
+    {% set addr = hostvars[host]['ansible_' + interface][hosts_ip_protocol]['address']|default(None} -%}
+    {% if addr -%}
+      {% if interface == di -%}
+{{ addr }}    {{ host.name }} {{ host.name }}-{{ interface }} {{ host.aliases | default('') | join(' ') }}
+      {% else -%}
+{{ addr }}    {{ host.name }}-{{ interface }} {{ host.aliases | default('') | join(' ') }}
+      {% endif -%}
     {% endif -%}
   {% endfor -%}
 
