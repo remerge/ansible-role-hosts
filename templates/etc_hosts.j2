@@ -4,12 +4,12 @@
 {% if hosts_network_interface -%}
 {% set def_interface = hosts_network_interface -%}
 {% else -%}
-{% set def_inteface = ansible_default_ipv4['interface']|default(None) -%}
-{% endif -%
+{% set def_interface = ansible_default_ipv4['interface']|default(None) -%}
+{% endif -%}
 
-{% if def_interface -%}
+# Localhost
+{% if def_interface and hosts_add_ansible_managed_hosts -%}
 127.0.0.1  localhost.localdomain  localhost
-{{ hostvars[inventory_hostname]['ansible_' + def_interface]['ipv4'] }}    {{ ansible_fqdn }} {{ansible_hostname }}
 {% else -%}
 127.0.0.1  localhost.localdomain  localhost {{ ansible_fqdn }} {{ansible_hostname }}
 {% endif -%}
@@ -24,26 +24,28 @@ ff02::2  ip6-allrouters
 {% endif %}
 
 {% if hosts_add_ansible_managed_hosts %}
-# Entries for Ansible managed hosts
+# 
+# Hosts managed by Ansible
+#
 {% for group in hosts_add_ansible_managed_hosts_groups %}
 {% for host in groups[group]|sort %}
-{% set my_interfaces = hostvars[host][ansible_interfaces]|["lo"] -%}
+# {{ host }}
+{% set my_interfaces = hostvars[host]['ansible_interfaces']|select('match', '(?!^lo).*')|default(None) -%}
   {% if hosts_network_interface -%}
     {% set di = hosts_network_interface -%}
   {% else -%}
     {% set di = hostvars[host]['ansible_default_' + hosts_ip_protocol]['interface']|default(None) -%}
   {% endif -%}
-  {% for interface in my_interfaces -%}
-    {% set addr = hostvars[host]['ansible_' + interface][hosts_ip_protocol]['address']|default(None} -%}
+  {% for interface in my_interfaces|sort -%}
+    {% set addr = hostvars[host]['ansible_' + interface][hosts_ip_protocol]['address']|default(None) -%}
     {% if addr -%}
-      {% if interface == di -%}
-{{ addr }}    {{ host.name }} {{ host.name }}-{{ interface }} {{ host.aliases | default('') | join(' ') }}
-      {% else -%}
-{{ addr }}    {{ host.name }}-{{ interface }} {{ host.aliases | default('') | join(' ') }}
-      {% endif -%}
+{% if interface == di -%}
+{{ addr }}    {{ host }}-{{ interface }}  {{ host }}  {{ hostvars[host]['ansible_fqdn'] }}
+{% else -%}
+{{ addr }}    {{ host }}-{{ interface }}
+{% endif -%}
     {% endif -%}
   {% endfor -%}
-
 {% endfor -%}
 {% endfor -%}
 {% endif -%}
