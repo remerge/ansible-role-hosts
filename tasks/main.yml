@@ -4,11 +4,11 @@
 - name: Install user-defined custom hosts file
   copy:
     src: "{{ hosts_file_src }}"
-    dest: "hosts_file"
+    dest: "{{ hosts_file }}"
     owner: root
     group: root
     mode: 0644
-    backup: "{{ hosts_file_backup }}"
+    backup: "{{ host_file_backup }}"
   tags: hosts
   when: hosts_file_src is defined
 
