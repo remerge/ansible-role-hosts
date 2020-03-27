@@ -1,5 +1,7 @@
 # roles/hosts/tasks/main.yml
 ---
+- name: Gather facts again
+  setup:
 
 - name: Install user-defined custom hosts file
   copy:
