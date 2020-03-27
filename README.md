@@ -8,6 +8,22 @@ An Ansible role for managing the hosts file (`/etc/hosts`). Specifically, the re
 - Add entries specified in Yaml (optional, see below);
 - Add entries specified in text files (optional).
 
+## Selecting the correct network interface
+
+When a host has multiple network interfaces, an entry in the hosts file will be generated for each interface with the interface name as suffix.
+If `hosts_network_interface` is selected, that IP address will also be given the names provided by `ansible_hostname` and `ansible_fqdn`.
+For example, with `hosts_network_interface` set to `eth0`, a node with three interfaces may have entries similar to the following:
+
+```
+10.10.0.1      node01-eth0 node01 node01.example.com
+10.30.0.1      node01-eth1
+192.168.0.50   node01-ib0
+```
+
+If `hosts_network_interface` is not set, `ansible_hostname` and `ansible_fqdn` will be named according to the default route.
+In cases where `hosts_network_interface` is not set and there is no default route, only the interface-based names will be generated.
+
+
 ## Requirements
 
 No specific requirements
