@@ -3,9 +3,6 @@
 
 hosts_playbook_version: "1.0.1"
 
-# If set to true, an entry for `ansible_hostname`, bound to the host's default IPv4 address is added added.
-hosts_add_default_ipv4: true
-
 # If set to true, basic IPv6 entries (localhost6, ip6-localnet, etc) are added.
 hosts_add_basic_ipv6: false
 
