@@ -3,6 +3,12 @@
 - name: Gather facts again
   setup:
 
+- name: register hosts list if ansible group limit is specified
+  set_fact:
+    hosts_add_ansible_managed_hosts_groups:
+      - "{{ ansible_limit }}"
+  when: ansible_limit is defined
+
 - name: Install user-defined custom hosts file
   copy:
     src: "{{ hosts_file_src }}"
