@@ -2,16 +2,16 @@
 #
 # {{ ansible_managed }}
 {% if hosts_network_interface -%}
-{% set def_interface = hosts_network_interface -%}
+{% set my_interface_name = hosts_network_interface -%}
 {% else -%}
-{% set def_interface = ansible_default_ipv4['interface']|default(None) -%}
+{% set my_interface_name = hostvars[inventory_hostname]['ansible_default_' + hosts_ip_protocol]['interface']|default(None) -%}
 {% endif -%}
+{% set my_interface = hostvars[inventory_hostname]['ansible_' + my_interface_name] -%}
 
 # Localhost
-{% if def_interface and hosts_add_ansible_managed_hosts -%}
 127.0.0.1  localhost.localdomain  localhost
-{% else -%}
-127.0.0.1  localhost.localdomain  localhost {{ ansible_fqdn }} {{ansible_hostname }}
+{% if not hosts_add_ansible_managed_hosts -%}
+{{ my_interface[hosts_ip_protocol]['address'] }}  {{ ansible_fqdn }}  {{ ansible_hostname }}
 {% endif -%}
 
 {% if hosts_add_basic_ipv6 %}
@@ -24,28 +24,19 @@ ff02::2  ip6-allrouters
 {% endif %}
 
 {% if hosts_add_ansible_managed_hosts %}
-# 
+#
 # Hosts managed by Ansible
 #
 {% for group in hosts_add_ansible_managed_hosts_groups %}
 {% for host in groups[group]|sort %}
 # {{ host }}
-{% set my_interfaces = hostvars[host]['ansible_interfaces']|select('match', '(?!^lo).*')|default(None) -%}
-  {% if hosts_network_interface -%}
-    {% set di = hosts_network_interface -%}
-  {% else -%}
-    {% set di = hostvars[host]['ansible_default_' + hosts_ip_protocol]['interface']|default(None) -%}
-  {% endif -%}
-  {% for interface in my_interfaces|sort -%}
-    {% set addr = hostvars[host]['ansible_' + interface][hosts_ip_protocol]['address']|default(None) -%}
-    {% if addr -%}
-{% if interface == di -%}
-{{ addr }}    {{ host }}-{{ interface }}  {{ host }}  {{ hostvars[host]['ansible_fqdn'] }}
+{% if hostvars[host]['hosts_network_interface'] -%}
+{% set their_interface_name = hostvars[host]['hosts_network_interface'] -%}
 {% else -%}
-{{ addr }}    {{ host }}-{{ interface }}
+{% set their_interface_name = hostvars[host]['ansible_default_' + hosts_ip_protocol]['interface']|default(None) -%}
 {% endif -%}
-    {% endif -%}
-  {% endfor -%}
+{% set their_interface = hostvars[host]['ansible_' + their_interface_name] -%}
+{{ their_interface[hosts_ip_protocol]['address'] }}  {{ hostvars[host]['ansible_fqdn'] }}  {{ hostvars[host]['ansible_hostname'] }}
 {% endfor -%}
 {% endfor -%}
 {% endif -%}
